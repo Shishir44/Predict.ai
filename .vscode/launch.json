@@ -1,0 +1,59 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Module",
+            "type": "python",
+            "request": "launch",
+            "module": "${relativeFileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Streamlit App",
+            "type": "python",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "${workspaceFolder}/ui/streamlit_app.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Test Module",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${relativeFileDirname}",
+                "-v",
+                "--cov=src",
+                "--cov-report=term-missing"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Jupyter Notebook",
+            "type": "python",
+            "request": "launch",
+            "module": "jupyter",
+            "args": [
+                "notebook",
+                "--notebook-dir=${workspaceFolder}/notebooks"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
