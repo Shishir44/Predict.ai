@@ -1,0 +1,72 @@
+# .env files
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Testing
+coverage.xml
+.nox/
+.tox/
+.coverage
+.coverage.*
+.cache
+
+# Local development
+venv/
+env/
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Jupyter
+.ipynb_checkpoints
+
+# MLflow
+mlruns/
+
+# Data
+__data__/
+*.dat
+*.pkl
+*.npy
+*.npz
