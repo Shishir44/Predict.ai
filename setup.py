@@ -4,8 +4,8 @@ setup(
     name="battery-prediction",
     version="1.0.0",
     description="Battery State of Health and State of Charge Prediction System",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Shishir Kafle",
+    author_email="shishirkafle44@gmail.com",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=[
