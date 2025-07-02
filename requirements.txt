@@ -20,3 +20,6 @@ jupyter
 notebook
 pytest-cov
 coverage
+tensorflow-serving-api
+fastapi
+scikeras
