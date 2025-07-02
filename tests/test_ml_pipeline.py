@@ -91,8 +91,26 @@ class TestMLPipeline(unittest.TestCase):
 
     def test_lstm_model_training(self):
         """Test LSTM model training."""
-        # Skip this test since it requires model file format updates
-        self.skipTest("LSTM training test requires Keras format updates")
+        preprocessor = BatteryDataPreprocessor(data_dir=str(self.data_dir))
+        result = preprocessor.prepare_data_for_training()
+        
+        if result is None:
+            self.skipTest("No data available for LSTM training test")
+        
+        (X_train, _, _), (y_soh_train, _, _), (y_soc_train, _, _) = result
+
+        trainer = LSTMModelTrainer()
+        history = trainer.train_model(
+            X_train=X_train,
+            y_soh_train=y_soh_train,
+            y_soc_train=y_soc_train,
+            epochs=1  # Reduced epochs for testing
+        )
+
+        # Verify training completed
+        self.assertTrue('loss' in history.history)
+        self.assertTrue('soh_output_mse' in history.history)
+        self.assertTrue('soc_output_mse' in history.history)
 
     def test_transformer_model_training(self):
         """Test Transformer model training."""
@@ -118,18 +136,95 @@ class TestMLPipeline(unittest.TestCase):
 
     def test_model_comparison(self):
         """Test model comparison functionality."""
-        # Skip this test since it requires trained model files
-        self.skipTest("Model comparison test requires actual trained models")
+        from src.inference.production_predictor import ProductionBatteryPredictor
+        
+        # Create predictor
+        predictor = ProductionBatteryPredictor()
+        
+        # Test features
+        test_features = {
+            'cycle_number': 100,
+            'capacity_ah': 1.8,
+            'ambient_temperature': 24.0,
+            'capacity_normalized': 0.8,
+            'cycle_progress': 0.5,
+            'temp_deviation': 0.0
+        }
+        
+        # Test Random Forest prediction
+        rf_result = predictor.predict_battery_health(test_features, model_type="random_forest")
+        self.assertIsInstance(rf_result.soh_prediction, float)
+
+        # Test model info
+        model_info = predictor.get_model_info()
+        self.assertIn('available_models', model_info)
+        self.assertIn('total_predictions', model_info)
+        
+        # Test health status
+        health = predictor.get_health_status()
+        self.assertIn('status', health)
+        self.assertIn('models_loaded', health)
 
     def test_model_deployment(self):
         """Test model deployment functionality."""
-        # Skip this test since it requires the actual LSTM model file
-        self.skipTest("Model deployment test requires actual trained model files")
+        from src.deployment.tensorflow_serving import TensorFlowServingDeployer
+        
+        # Create deployer
+        deployer = TensorFlowServingDeployer(serving_dir=str(Path(self.test_dir) / 'serving'))
+
+        # Check if LSTM model exists
+        lstm_path = Path("models/lstm_soh_model.h5")
+        if lstm_path.exists():
+            # Test model preparation
+            result = deployer.prepare_model_for_serving(str(lstm_path))
+            self.assertEqual(result['status'], 'success')
+            
+            # Test model status
+            status = deployer.get_model_status()
+            self.assertIn('model_ready', status)
+            
+            # Test prediction (if model is prepared)
+            if status['model_ready']:
+                test_input = np.random.random((1, 6))  # 6 features
+                pred_result = deployer.make_prediction(test_input)
+                self.assertIn('status', pred_result)
+        else:
+            self.skipTest("LSTM model file not found for deployment test")
 
     def test_model_monitoring(self):
         """Test model monitoring functionality."""
-        # Skip this test since it requires a running model server
-        self.skipTest("Model monitoring test requires running model server")
+        from src.monitoring.monitoring_service import MonitoringService
+        from src.inference.production_predictor import ProductionBatteryPredictor
+        
+        # Create predictor and monitoring service
+        predictor = ProductionBatteryPredictor()
+        monitor = MonitoringService(predictor, db_path=str(Path(self.test_dir) / 'test_monitoring.db'))
+        
+        # Test features
+        test_features = {
+            'cycle_number': 100,
+            'capacity_ah': 1.8,
+            'ambient_temperature': 24.0,
+            'capacity_normalized': 0.8,
+            'cycle_progress': 0.5,
+            'temp_deviation': 0.0
+        }
+        
+        # Make a prediction
+        result = predictor.predict_battery_health(test_features)
+        
+        # Record prediction for monitoring
+        monitor.record_prediction(test_features, result)
+        
+        # Test drift detection
+        drift_result = monitor.detect_drift(test_features)
+        self.assertIn('drift_detected', drift_result)
+        self.assertIn('drift_score', drift_result)
+
+        # Test metrics
+        metrics = monitor.get_metrics(hours=1)
+        self.assertIn('prediction_count', metrics)
+        self.assertIn('performance', metrics)
 
     def test_model_retraining(self):
         """Test model retraining functionality."""

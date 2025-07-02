@@ -81,7 +81,7 @@ class LSTMModelTrainer:
                 restore_best_weights=True
             ),
             callbacks.ModelCheckpoint(
-                filepath=str(self.model_dir / 'lstm_model_{epoch:02d}_{val_loss:.4f}.h5'),
+                filepath=str(self.model_dir / 'lstm_model_{epoch:02d}_{val_loss:.4f}.keras'),
                 monitor='val_loss',
                 save_best_only=True
             ),
@@ -116,7 +116,7 @@ class LSTMModelTrainer:
         )
 
         # Save final model
-        self.model.save(str(self.model_dir / 'lstm_model.h5'))
+        self.model.save(str(self.model_dir / 'lstm_model.keras'))
 
         logger.info("Model training completed successfully")
         return history

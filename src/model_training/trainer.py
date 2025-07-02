@@ -10,6 +10,7 @@ from typing import Dict, List
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from config.model_config import ProjectConfig
+from src.model_training.battery_model import BatteryLSTMModel
 
 class BatteryModelTrainer:
     """
@@ -30,20 +31,30 @@ class BatteryModelTrainer:
         Prepare data for training.
         
         Args:
-            X: Input features
+            X: Input features (3D array: samples, sequence_length, features)
             y_soh: True SOH values
             y_soc: True SOC values
             
         Returns:
             Dictionary containing split datasets
         """
-        # Scale features
+        # Handle 3D sequence data for StandardScaler
+        original_shape = X.shape
+        if len(X.shape) == 3:
+            # Reshape 3D to 2D for scaling: (samples*sequence, features)
+            X_reshaped = X.reshape(-1, X.shape[-1])
+            # Fit and transform
+            X_scaled = self.feature_scaler.fit_transform(X_reshaped)
+            # Reshape back to 3D: (samples, sequence, features)
+            X = X_scaled.reshape(original_shape)
+        else:
+            # Handle 2D data normally
         X = self.feature_scaler.fit_transform(X)
         
         # Split data
         X_train, X_test, y_soh_train, y_soh_test, y_soc_train, y_soc_test = train_test_split(
             X, y_soh, y_soc,
-            test_size=self.config.model_config.validation_split,
+            test_size=self.config.ml_model_config.validation_split,
             random_state=42
         )
         
@@ -65,14 +76,14 @@ class BatteryModelTrainer:
         """
         # Build model
         self.model = BatteryLSTMModel(
-            sequence_length=self.config.model_config.sequence_length,
-            num_features=self.config.model_config.num_features
+            sequence_length=self.config.ml_model_config.sequence_length,
+            num_features=self.config.ml_model_config.num_features
         )
         
         # Compile with multiple outputs
         self.model.compile(
             optimizer=tf.keras.optimizers.Adam(
-                learning_rate=self.config.model_config.learning_rate
+                learning_rate=self.config.ml_model_config.learning_rate
             ),
             loss={
                 'soh_output': 'mse',
@@ -96,8 +107,8 @@ class BatteryModelTrainer:
                     'soc_output': data_dict['y_soc_test']
                 }
             ),
-            epochs=self.config.model_config.epochs,
-            batch_size=self.config.model_config.batch_size,
+            epochs=self.config.ml_model_config.epochs,
+            batch_size=self.config.ml_model_config.batch_size,
             callbacks=self._get_callbacks(),
             verbose=1
         )
@@ -123,7 +134,7 @@ class BatteryModelTrainer:
                 monitor='val_loss'
             ),
             tf.keras.callbacks.ModelCheckpoint(
-                self.config.model_config.model_save_path,
+                self.config.ml_model_config.model_save_path.replace('.h5', '.keras'),
                 save_best_only=True,
                 monitor='val_loss'
             )
@@ -131,10 +142,10 @@ class BatteryModelTrainer:
     
     def save_model(self):
         """Save the trained model and scaler."""
-        self.model.save(self.config.model_config.model_save_path)
+        self.model.save(self.config.ml_model_config.model_save_path)
         
         import joblib
-        scaler_path = self.config.model_config.scaler_save_path
+        scaler_path = self.config.ml_model_config.scaler_save_path
         joblib.dump(self.feature_scaler, scaler_path)
     
     def plot_training_history(self) -> None:
