@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-07-02T22:14:04.483365",
+  "model_type": "RandomForestRegressor",
+  "dataset": "nasa_comprehensive_dataset.csv",
+  "features": [
+    "cycle_number",
+    "capacity_ah",
+    "ambient_temperature",
+    "capacity_normalized",
+    "cycle_progress",
+    "temp_deviation"
+  ],
+  "train_samples": 2215,
+  "test_samples": 554,
+  "metrics": {
+    "train_r2": 0.9363205061514029,
+    "test_r2": 0.7810121836230086,
+    "train_mae": 0.47615082510001683,
+    "test_mae": 0.920968467513421,
+    "train_rmse": 1.3827547210180684,
+    "test_rmse": 2.6205372945739698
+  },
+  "feature_importance": [
+    {
+      "feature": "capacity_normalized",
+      "importance": 0.2738767663220497
+    },
+    {
+      "feature": "capacity_ah",
+      "importance": 0.24627760182380146
+    },
+    {
+      "feature": "cycle_number",
+      "importance": 0.20823874724684702
+    },
+    {
+      "feature": "cycle_progress",
+      "importance": 0.1393999738847877
+    },
+    {
+      "feature": "ambient_temperature",
+      "importance": 0.07226446107968576
+    },
+    {
+      "feature": "temp_deviation",
+      "importance": 0.05994244964282848
+    }
+  ],
+  "hyperparameters": {
+    "n_estimators": 200,
+    "max_depth": 15,
+    "min_samples_split": 5,
+    "min_samples_leaf": 2,
+    "random_state": 42
+  }
+}
