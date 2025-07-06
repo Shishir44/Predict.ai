@@ -28,6 +28,9 @@
    ```bash
    cd path/to/predict-ai
    ```
+   ```python
+   python -m venv venv
+   ```
 
 2. **Activate Environment** (if using virtual environment)
    ```bash
@@ -36,6 +39,8 @@
    
    # macOS/Linux
    source venv/bin/activate
+
+   pip install -r requirements.txt
    ```
 
 3. **Launch Enterprise Application**
